@@ -1,0 +1,22 @@
+{
+  "name": "Шаг за шагом — трезвость",
+  "short_name": "Шаг за шагом",
+  "description": "Счётчик трезвости, юбилеи, дневник и поиск групп АА рядом",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1720",
+  "theme_color": "#0f1720",
+  "categories": ["health", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Ежедневник", "url": "./#diary" },
+    { "name": "Группы рядом", "url": "./#groups" }
+  ]
+}

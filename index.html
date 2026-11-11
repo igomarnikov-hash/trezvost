@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Шаг за шагом — трезвость</title>
+<meta name="description" content="Счётчик трезвости, юбилеи, дневник и поиск групп АА рядом">
+<meta name="theme-color" content="#0f1720">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Шаг за шагом">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><span class="logo"></span><span id="screenTitle">Мой срок</span></div>
+    <button class="icon-btn" id="themeBtn" aria-label="Сменить тему">
+      <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- ============ СРОК ============ -->
+    <section class="screen active" id="s-sober">
+      <div id="onboard" class="card hero-empty hidden">
+        <div class="hero-emoji">🌱</div>
+        <h2>Когда начался ваш трезвый путь?</h2>
+        <p class="muted">Укажите дату первого трезвого дня. Всё хранится только на этом устройстве.</p>
+        <label class="field"><span>Дата трезвости</span><input type="date" id="obDate"></label>
+        <label class="field"><span>Имя (необязательно)</span><input type="text" id="obName" placeholder="Например, Игорь" maxlength="30"></label>
+        <button class="btn primary wide" id="obSave">Начать отсчёт</button>
+      </div>
+
+      <div id="soberView" class="hidden">
+        <div class="hero card">
+          <div class="ring-wrap">
+            <svg class="ring" viewBox="0 0 220 220">
+              <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--acc1)"/><stop offset="1" stop-color="var(--acc2)"/></linearGradient></defs>
+              <circle cx="110" cy="110" r="96" class="ring-bg"/>
+              <circle cx="110" cy="110" r="96" class="ring-fg" id="ringFg"/>
+            </svg>
+            <div class="ring-center">
+              <div class="big" id="daysBig">0</div>
+              <div class="unit" id="daysUnit">дней</div>
+            </div>
+          </div>
+          <div class="hello" id="hello"></div>
+          <div class="breakdown" id="breakdown"></div>
+          <div class="ticker" id="ticker"></div>
+        </div>
+
+        <div class="card anniv hidden" id="annivToday"></div>
+
+        <div class="card next">
+          <div class="row-between">
+            <div>
+              <div class="label">Следующий юбилей</div>
+              <div class="next-title" id="nextTitle">—</div>
+              <div class="muted small" id="nextDate"></div>
+            </div>
+            <div class="chip" id="nextLeft"></div>
+          </div>
+          <div class="bar"><div class="bar-fill" id="nextBar"></div></div>
+        </div>
+
+        <div class="stats">
+          <div class="stat card"><div class="label">Сэкономлено</div><div class="stat-val" id="saved">—</div><button class="link small" id="setMoney">настроить</button></div>
+          <div class="stat card"><div class="label">Собраний</div><div class="stat-val" id="meetCount">0</div><div class="muted small">по дневнику</div></div>
+        </div>
+
+        <div class="card">
+          <div class="row-between"><h3>Юбилеи</h3>
+            <div class="seg" id="msFilter"><button class="on" data-f="next">Впереди</button><button data-f="done">Пройдены</button></div>
+          </div>
+          <ul class="ms-list" id="msList"></ul>
+          <div class="btn-row">
+            <button class="btn ghost" id="icsBtn">📅 В календарь</button>
+            <button class="btn ghost" id="notifBtn">🔔 Уведомления</button>
+          </div>
+          <p class="muted small" id="notifHint">Добавьте юбилеи в календарь телефона — он напомнит за день и в сам день, даже если приложение закрыто.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ЕЖЕДНЕВНИК ============ -->
+    <section class="screen" id="s-diary">
+      <div class="card reading">
+        <div class="row-between">
+          <button class="icon-btn" id="dayPrev" aria-label="Предыдущий день"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <div class="center">
+            <div class="label">Ежедневные размышления</div>
+            <div class="read-date" id="readDate">—</div>
+          </div>
+          <button class="icon-btn" id="dayNext" aria-label="Следующий день"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+        <div class="center"><button class="chip soft hidden" id="todayBtn">↺ к сегодняшнему дню</button></div>
+        <div id="readBody" class="read-body"></div>
+      </div>
+
+      <div class="card" id="entryCard">
+        <div class="row-between">
+          <h3 id="entryTitle">Мои мысли</h3>
+          <span class="chip soft" id="entryDay"></span>
+        </div>
+
+        <div class="label mt">Настроение</div>
+        <div class="moods" id="moods">
+          <button data-v="1">😣</button><button data-v="2">😕</button><button data-v="3">😐</button><button data-v="4">🙂</button><button data-v="5">😄</button>
+        </div>
+
+        <div class="label mt">Тяга к алкоголю: <b id="cravingVal">0</b> / 10</div>
+        <input type="range" min="0" max="10" value="0" id="craving" class="range">
+
+        <div class="toggles">
+          <label class="tog"><input type="checkbox" id="eMeeting"><span>Был(а) на собрании</span></label>
+          <label class="tog"><input type="checkbox" id="eSponsor"><span>Звонил(а) спонсору / другу</span></label>
+          <label class="tog"><input type="checkbox" id="eReading"><span>Читал(а) литературу</span></label>
+        </div>
+
+        <label class="field"><span>За что я благодарен сегодня</span><textarea id="eGrat" rows="2" placeholder="Три маленькие вещи…"></textarea></label>
+        <label class="field"><span>Мысли, чувства, итоги дня</span><textarea id="eNote" rows="4" placeholder="Как прошёл день? Что было трудным, что получилось?"></textarea></label>
+
+        <details class="step10">
+          <summary>Вечерний разбор (10-й шаг)</summary>
+          <label class="field"><span>Где я был эгоистичен, нечестен или напуган?</span><textarea id="eS1" rows="2"></textarea></label>
+          <label class="field"><span>Должен ли я перед кем-то извиниться?</span><textarea id="eS2" rows="2"></textarea></label>
+          <label class="field"><span>Что я сделал хорошего для других?</span><textarea id="eS3" rows="2"></textarea></label>
+        </details>
+
+        <div class="btn-row">
+          <button class="btn primary" id="eSave">Сохранить</button>
+          <button class="btn ghost danger hidden" id="eDel">Удалить</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Последние записи</h3>
+        <ul class="entries" id="recent"></ul>
+      </div>
+    </section>
+
+    <!-- ============ ГРУППЫ ============ -->
+    <section class="screen" id="s-groups">
+      <div class="card locate">
+        <div class="locate-ico">📍</div>
+        <div class="grow">
+          <h3>Группы АА Москвы и области</h3>
+          <div class="muted small" id="locStatus">Покажем ближайшие собрания и расстояние до них.</div>
+        </div>
+      </div>
+      <button class="btn primary wide" id="locBtn">Найти ближайшие ко мне</button>
+      <div class="search-city mt">
+        <input type="search" id="gSearch" placeholder="Название, метро, адрес или город">
+      </div>
+      <div class="row-between filters">
+        <div class="seg" id="gFilter"><button data-f="all" class="on">Все</button><button data-f="today">Сегодня</button><button data-f="online">Онлайн</button><button data-f="fav">★</button></div>
+        <span class="muted small" id="gCount"></span>
+      </div>
+      <ul class="groups" id="grpList"></ul>
+      <button class="btn ghost wide hidden" id="moreBtn">Показать ещё</button>
+
+      <div class="row-between sec-head"><h3>Свои группы</h3><button class="btn small ghost" id="addGroupBtn">+ Добавить</button></div>
+      <ul class="groups" id="myGroups"></ul>
+      <p class="muted small center" id="myEmpty">Если вашей группы нет в списке (например, в другом городе) — добавьте её вручную.</p>
+      <p class="muted small center">Расписание — с сайта <a href="https://aamos.ru/index.php/timetable-today/group-list" target="_blank" rel="noopener">aamos.ru</a> на <span id="gDate"></span>. Перед поездкой уточняйте по телефону группы. Другие города: <a href="https://aarussia.ru" target="_blank" rel="noopener">aarussia.ru</a></p>
+    </section>
+
+    <!-- ============ НАСТРОЙКИ ============ -->
+    <section class="screen" id="s-settings">
+      <div class="card">
+        <h3>Профиль</h3>
+        <label class="field"><span>Имя</span><input type="text" id="sName" maxlength="30"></label>
+        <label class="field"><span>Дата трезвости</span><input type="date" id="sDate"></label>
+        <label class="field"><span>Сколько тратил(а) на алкоголь в день, ₽</span><input type="number" id="sMoney" min="0" step="50" inputmode="numeric"></label>
+        <button class="btn primary wide" id="sSave">Сохранить</button>
+      </div>
+      <div class="card">
+        <h3>Данные</h3>
+        <p class="muted small">Всё хранится локально на устройстве. Делайте резервную копию перед сменой телефона.</p>
+        <div class="btn-row">
+          <button class="btn ghost" id="exportBtn">⬇ Экспорт</button>
+          <label class="btn ghost file-btn">⬆ Импорт<input type="file" id="importInput" accept="application/json"></label>
+        </div>
+        <button class="btn ghost danger wide mt" id="resetBtn">Начать отсчёт заново</button>
+      </div>
+      <div class="card">
+        <h3>Помощь</h3>
+        <p class="small">Если тянет выпить — позвоните спонсору или товарищу по группе, сходите на собрание (в т.ч. онлайн), выпейте воды и поешьте. <b>Только сегодня.</b></p>
+        <ul class="help-list" id="helpList"></ul>
+        <p class="muted small">Сайт русскоязычного содружества АА: <a href="https://aarussia.ru" target="_blank" rel="noopener">aarussia.ru</a></p>
+      </div>
+      <div class="card quote">
+        <div class="q">«Боже, дай мне разум и душевный покой принять то, что я не в силах изменить, мужество изменить то, что могу, и мудрость отличить одно от другого».</div>
+        <div class="muted small">Молитва о душевном покое</div>
+      </div>
+      <p class="muted small center" id="installHint"></p>
+      <p class="muted small center">Версия 1.1 · данные не покидают устройство</p>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab active" data-s="s-sober" data-t="Мой срок"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.6-7 11-7 11z"/></svg><span>Срок</span></button>
+    <button class="tab" data-s="s-diary" data-t="Ежедневник"><svg viewBox="0 0 24 24"><path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6zM6 3v18M10 8h5M10 12h5"/></svg><span>Ежедневник</span></button>
+    <button class="tab" data-s="s-groups" data-t="Группы рядом"><svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Группы</span></button>
+    <button class="tab" data-s="s-settings" data-t="Настройки"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Ещё</span></button>
+  </nav>
+</div>
+
+<!-- Модальное окно -->
+<div class="modal hidden" id="modal">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3 id="mTitle"></h3>
+    <div id="mBody"></div>
+    <div class="btn-row" id="mBtns"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="confetti" id="confetti"></div>
+
+<script src="groups-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
