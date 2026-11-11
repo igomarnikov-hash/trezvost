@@ -362,7 +362,7 @@ function parseBookPages(pages) {
   return out;
 }
 async function importBook(e) {
-  const file = e.target.files[0]; if (!file) return;
+  const file = e.file || e.target.files[0]; if (!file) return;
   const st = $('#bookStatus');
   try {
     let book;
@@ -379,7 +379,7 @@ async function importBook(e) {
     S.book = book; save(); renderBookStatus(); renderReading();
     toast(`Книга загружена: ${n} ${plural(n, ['дата', 'даты', 'дат'])}`);
   } catch (err) { renderBookStatus(); toast('Не удалось прочитать файл. Нужен интернет для первого открытия PDF.'); }
-  e.target.value = '';
+  if (e.target) e.target.value = '';
 }
 function renderBookStatus() {
   const n = Object.keys(S.book || {}).length;
@@ -388,6 +388,23 @@ function renderBookStatus() {
   $('#bookPick').textContent = n ? 'Заменить файл' : '📥 Выбрать PDF';
 }
 $('#bookFile').onchange = importBook;
+$('#bookUrlBtn').onclick = async () => {
+  const url = $('#bookUrl').value.trim();
+  if (!/^https?:\/\//.test(url)) return toast('Вставьте ссылку, начинающуюся с https://');
+  $('#bookStatus').innerHTML = '<span class="spinner"></span> Скачиваю книгу…';
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const name = /\.json(\?|$)/i.test(url) ? 'book.json' : /\.txt(\?|$)/i.test(url) ? 'book.txt' : 'book.pdf';
+    const file = new File([blob], name, { type: name.endsWith('.pdf') ? 'application/pdf' : blob.type });
+    await importBook({ file });
+    $('#bookUrl').value = '';
+  } catch (err) {
+    renderBookStatus();
+    toast('Не удалось скачать файл по ссылке. Сервер должен разрешать загрузку с других сайтов (CORS).');
+  }
+};
 $('#bookDel').onclick = () => modal('Удалить книгу с устройства?', '<p class="muted">Текст «Ежедневных размышлений» будет удалён из приложения. Ваши записи останутся.</p>', [
   { text: 'Отмена' }, { text: 'Удалить', cls: 'primary', onClick: () => { S.book = {}; save(); renderBookStatus(); renderReading(); } }]);
 

@@ -1,5 +1,5 @@
 /* Service worker: офлайн-режим + фоновая проверка юбилеев */
-const VERSION = 'v1.2.0';
+const VERSION = 'v1.3.0';
 const CORE = ['./', 'index.html', 'styles.css', 'app.js', 'groups-data.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', e => {
