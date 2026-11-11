@@ -68,24 +68,14 @@
             <div class="chip" id="nextLeft"></div>
           </div>
           <div class="bar"><div class="bar-fill" id="nextBar"></div></div>
-        </div>
-
-        <div class="stats">
-          <div class="stat card"><div class="label">Сэкономлено</div><div class="stat-val" id="saved">—</div><button class="link small" id="setMoney">настроить</button></div>
-          <div class="stat card"><div class="label">Собраний</div><div class="stat-val" id="meetCount">0</div><div class="muted small">по дневнику</div></div>
-        </div>
-
-        <div class="card">
-          <div class="row-between"><h3>Юбилеи</h3>
-            <div class="seg" id="msFilter"><button class="on" data-f="next">Впереди</button><button data-f="done">Пройдены</button></div>
-          </div>
-          <ul class="ms-list" id="msList"></ul>
           <div class="btn-row">
             <button class="btn ghost" id="icsBtn">📅 В календарь</button>
             <button class="btn ghost" id="notifBtn">🔔 Уведомления</button>
           </div>
-          <p class="muted small" id="notifHint">Добавьте юбилеи в календарь телефона — он напомнит за день и в сам день, даже если приложение закрыто.</p>
+          <p class="muted small" id="notifHint">Юбилеи добавятся в календарь телефона — он напомнит накануне и в сам день, даже если приложение закрыто.</p>
         </div>
+
+        <div class="stat card"><div class="label">Собраний</div><div class="stat-val" id="meetCount">0</div><div class="muted small">отмечено в ежедневнике</div></div>
       </div>
     </section>
 
@@ -178,8 +168,16 @@
         <h3>Профиль</h3>
         <label class="field"><span>Имя</span><input type="text" id="sName" maxlength="30"></label>
         <label class="field"><span>Дата трезвости</span><input type="date" id="sDate"></label>
-        <label class="field"><span>Сколько тратил(а) на алкоголь в день, ₽</span><input type="number" id="sMoney" min="0" step="50" inputmode="numeric"></label>
         <button class="btn primary wide" id="sSave">Сохранить</button>
+      </div>
+      <div class="card">
+        <h3>📖 Ежедневные размышления</h3>
+        <p class="muted small">Выберите PDF книги — приложение прочитает его прямо на телефоне и будет показывать текст на каждую дату. Файл никуда не отправляется.</p>
+        <div class="book-status" id="bookStatus">Книга не загружена</div>
+        <div class="btn-row">
+          <label class="btn primary file-btn"><span id="bookPick">📥 Выбрать PDF</span><input type="file" id="bookFile" accept=".pdf,application/pdf,.txt,.json"></label>
+          <button class="btn ghost danger hidden" id="bookDel">Удалить</button>
+        </div>
       </div>
       <div class="card">
         <h3>Данные</h3>
@@ -201,7 +199,7 @@
         <div class="muted small">Молитва о душевном покое</div>
       </div>
       <p class="muted small center" id="installHint"></p>
-      <p class="muted small center">Версия 1.1 · данные не покидают устройство</p>
+      <p class="muted small center">Версия 1.2 · данные не покидают устройство</p>
     </section>
   </main>
 

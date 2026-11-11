@@ -98,8 +98,6 @@ $('#obSave').onclick = () => {
   if (parseYmd(v) > today0()) return toast('Дата не может быть в будущем');
   S.start = v; S.name = $('#obName').value.trim(); save(); renderSober(); confetti();
 };
-let msFilter = 'next';
-$$('#msFilter button').forEach(b => b.onclick = () => { msFilter = b.dataset.f; $$('#msFilter button').forEach(x => x.classList.toggle('on', x === b)); renderMilestones(); });
 
 function renderSober() {
   const has = !!S.start;
@@ -135,11 +133,7 @@ function renderSober() {
     const k = 'conf-' + ymd(t0); if (!sessionStorage.getItem(k)) { try { sessionStorage.setItem(k, 1); } catch {} setTimeout(confetti, 500); }
   } else ann.classList.add('hidden');
 
-  // экономия
-  $('#saved').textContent = S.money > 0 ? Math.round(S.money * days).toLocaleString('ru-RU') + ' ₽' : '—';
-  $('#setMoney').classList.toggle('hidden', S.money > 0);
   $('#meetCount').textContent = Object.values(S.entries).filter(e => e.meeting).length;
-  renderMilestones();
   tick();
 }
 function tick() {
@@ -152,16 +146,6 @@ setInterval(tick, 1000);
 let lastDay = ymd(new Date());
 setInterval(() => { if (ymd(new Date()) !== lastDay) { lastDay = ymd(new Date()); renderSober(); } }, 30000);
 
-function renderMilestones() {
-  const start = parseYmd(S.start), t0 = today0();
-  let ms = milestones(start);
-  ms = msFilter === 'next' ? ms.filter(x => x.date > t0).slice(0, 12) : ms.filter(x => x.date <= t0).reverse();
-  $('#msList').innerHTML = ms.length ? ms.map(x => {
-    const left = daysBetween(t0, x.date);
-    return `<li class="${x.date <= t0 ? 'done' : ''}"><div class="ms-ico">${x.ico}</div><div><div class="ms-name">${esc(x.title)}</div><div class="ms-when">${fmtDate(x.date)}</div></div><div class="ms-left">${left > 0 ? 'через ' + left + ' ' + plural(left, W.d) : left === 0 ? 'сегодня' : '✓'}</div></li>`;
-  }).join('') : `<li class="muted small">${msFilter === 'done' ? 'Первый юбилей уже совсем скоро.' : 'Все юбилеи пройдены — невероятно!'}</li>`;
-}
-$('#setMoney').onclick = () => { go('s-settings'); setTimeout(() => $('#sMoney').focus(), 200); };
 
 /* --- календарь .ics --- */
 $('#icsBtn').onclick = () => {
@@ -245,46 +229,20 @@ function renderReading() {
       ${r.q ? `<blockquote>${esc(r.q).replace(/\n/g, '<br>')}</blockquote>` : ''}
       ${r.s ? `<div class="read-src">${esc(r.s)}</div>` : ''}
       <div class="read-text">${paras}</div>
-      <div class="btn-row"><button class="btn ghost small" id="rEdit">✎ Изменить</button><button class="btn ghost small" id="rCopy">⧉ Копировать</button></div>
-      <div class="muted small center mt">В книге ${n} ${plural(n, ['дата', 'даты', 'дат'])} · <label class="link small">заменить файл<input type="file" class="bookFile" accept=".txt,.json,text/plain,application/json" hidden></label></div>`;
-    $('#rEdit').onclick = () => editReading();
+      <div class="btn-row"><button class="btn ghost small" id="rCopy">⧉ Копировать</button></div>`;
     $('#rCopy').onclick = async () => { try { await navigator.clipboard.writeText([r.t, r.q, r.s, r.x].filter(Boolean).join('\n\n')); toast('Скопировано'); } catch { toast('Не удалось скопировать'); } };
   } else if (!n) {
     body.innerHTML = `<div class="read-empty">
       <div class="hero-emoji">📖</div>
-      <h3>Загрузите книгу «Ежедневные размышления»</h3>
-      <p class="muted small">Текст книги принадлежит издательству АА и защищён авторским правом, поэтому он не встроен в приложение. Загрузите свой экземпляр файлом <b>.txt</b> или <b>.json</b> — и здесь каждый день будет открываться размышление на сегодняшнюю дату. Файл остаётся только на вашем устройстве.</p>
-      <div class="btn-row">
-        <label class="btn primary file-btn">📥 Загрузить файл<input type="file" class="bookFile" accept=".txt,.json,text/plain,application/json"></label>
-        <button class="btn ghost" id="rAdd">✎ Вписать на этот день</button>
-      </div>
-      <details class="fmt"><summary class="small">Какой формат файла подходит?</summary>
-        <p class="small muted">Обычный текст, где каждая дата начинается с отдельной строки вида <b>11 НОЯБРЯ</b>. Следом идут заголовок, цитата, строка-источник (например, «АНОНИМНЫЕ АЛКОГОЛИКИ, с. 84») и сам текст. Подойдёт текст, скопированный из электронной книги.</p>
-      </details>
-      <p class="small muted">Официальная ежедневная публикация на английском: <a href="https://www.aa.org/daily-reflections" target="_blank" rel="noopener">aa.org/daily-reflections</a></p>
+      <h3>Книга ещё не загружена</h3>
+      <p class="muted small">Загрузите PDF «Ежедневных размышлений» один раз в разделе «Ещё» — и здесь каждый день будет открываться текст на сегодняшнюю дату.</p>
+      <button class="btn primary" id="rGo">Загрузить книгу</button>
     </div>`;
-    $('#rAdd').onclick = () => editReading();
+    $('#rGo').onclick = () => go('s-settings');
   } else {
-    body.innerHTML = `<div class="read-empty"><p class="muted">Для этой даты в загруженной книге нет текста.</p><button class="btn ghost" id="rAdd">✎ Вписать текст</button></div>`;
-    $('#rAdd').onclick = () => editReading();
+    body.innerHTML = `<div class="read-empty"><p class="muted">Для этой даты текст в книге не найден.</p></div>`;
   }
-  $$('.bookFile').forEach(inp => inp.onchange = importBook);
-}
 
-function editReading() {
-  const r = (S.book || {})[mmdd(selDay)] || {};
-  const d = parseYmd(selDay);
-  modal(`${d.getDate()} ${MONTHS[d.getMonth()]}`,
-    `<label class="field"><span>Заголовок</span><input type="text" id="rT" value="${esc(r.t || '')}"></label>
-     <label class="field"><span>Цитата</span><textarea id="rQ" rows="3">${esc(r.q || '')}</textarea></label>
-     <label class="field"><span>Источник</span><input type="text" id="rS" value="${esc(r.s || '')}"></label>
-     <label class="field"><span>Размышление</span><textarea id="rX" rows="9">${esc(r.x || '')}</textarea></label>`,
-    [{ text: 'Отмена' }, { text: 'Сохранить', cls: 'primary', onClick: () => {
-      const n = { t: $('#rT').value.trim(), q: $('#rQ').value.trim(), s: $('#rS').value.trim(), x: $('#rX').value.trim() };
-      S.book = S.book || {};
-      if (!n.t && !n.q && !n.x) delete S.book[mmdd(selDay)]; else S.book[mmdd(selDay)] = n;
-      save(); renderReading();
-    } }]);
 }
 
 const MONTH_RE = ['январ', 'феврал', 'март', 'апрел', 'ма[йя]', 'июн', 'июл', 'август', 'сентябр', 'октябр', 'ноябр', 'декабр'];
@@ -320,18 +278,118 @@ function parseBookJSON(j) {
   if (Array.isArray(j)) j.forEach(v => put(v.date || v.day || v.key, v)); else Object.entries(j).forEach(([k, v]) => put(k, v));
   return out;
 }
+
+/* --- PDF: чтение книги на устройстве --- */
+const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+async function loadPdfJs() {
+  if (window.pdfjsLib) return;
+  await new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = PDFJS + 'pdf.min.js'; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); });
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
+}
+async function pdfPages(file, onProgress) {
+  await loadPdfJs();
+  const doc = await window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+  const pages = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const tc = await (await doc.getPage(i)).getTextContent();
+    const lines = []; let cur = '', lastY = null, right = 0;
+    const push = () => { if (cur.trim()) lines.push({ t: cur.trim(), r: right }); cur = ''; };
+    for (const it of tc.items) {
+      const y = it.transform ? Math.round(it.transform[5]) : null;
+      if (lastY !== null && y !== null && Math.abs(y - lastY) > 3 && cur.trim()) push();
+      cur += it.str; if (y !== null) lastY = y;
+      if (it.str.trim() && it.transform) right = it.transform[4] + (it.width || 0);
+      if (it.hasEOL) push();
+    }
+    push();
+    // перенос слова: строка заканчивается буквой и чуть короче полной ширины (знак переноса не попал в текст)
+    const maxR = Math.max(0, ...lines.map(l => l.r));
+    pages.push(lines.map(l => (/[а-яё]$/.test(l.t) && maxR - l.r > 1.5 && maxR - l.r < 9) ? l.t + '\u00AD' : l.t));
+    if (onProgress && i % 10 === 0) onProgress(i, doc.numPages);
+  }
+  return pages;
+}
+const HEAD_RE = new RegExp('^([\\dип]{1,2})(' + MONTH_RE.join('|') + ')[а-яё]*$');
+function dateHead(line) {
+  const t = line.replace(/[\s\u00AD]+/g, '').toLowerCase();
+  if (t.length > 16) return null;
+  const m = t.match(HEAD_RE); if (!m) return null;
+  let d = m[1]; d = /^[ип]+$/.test(d) ? '11' : d.replace(/[ип]/g, '1');
+  if (!/^\d+$/.test(d) || +d < 1 || +d > 31) return null;
+  return `${pad(monthIdx(m[2]) + 1)}-${pad(+d)}`;
+}
+const isCaps = l => { const letters = l.replace(/[^А-ЯЁа-яёA-Za-z]/g, ''); return letters.length > 2 && letters === letters.toUpperCase(); };
+const endsSentence = l => /[.!?»…"“”]\s*$/.test(l);
+function joinLines(L) {
+  const lens = L.map(l => l.length).sort((a, b) => a - b), med = lens[Math.floor(lens.length * .75)] || 50;
+  let out = '';
+  L.forEach((l, i) => {
+    if (i === 0) { out = l; return; }
+    const prev = L[i - 1];
+    if (/[­]$/.test(out) || /[а-яё]-$/.test(out) && /^[а-яё]/.test(l)) out = out.replace(/[­-]$/, '') + l;
+    else if (endsSentence(prev) && prev.length < med * .8) out += '\n' + l;
+    else out += ' ' + l;
+  });
+  return out.replace(/­/g, '').replace(/ {2,}/g, ' ').trim();
+}
+function parseEntry(lines) {
+  const L = lines.filter(l => !/^\d{1,3}$/.test(l.trim()));
+  let i = 0; const title = [];
+  while (i < L.length && isCaps(L[i]) && title.length < 3) title.push(L[i++]);
+  const body = L.slice(i);
+  let eng = body.findIndex((l, k) => k < 30 && /\bp{1,2}\.\s*\d+/.test(l));
+  let ruEnd = eng >= 0 ? eng - 1 : body.findIndex((l, k) => k < 30 && /с\.\s*\d+\s*$/.test(l));
+  let q = '', s = '', xStart = 0;
+  if (ruEnd >= 0) {
+    let st = ruEnd;
+    while (st - 1 >= 0 && (!endsSentence(body[st - 1]) || /с\.\s*\d+\s*$/.test(body[st - 1]))) st--;
+    if (st === 0) st = ruEnd; // не нашли конец цитаты — источник одной строкой
+    q = joinLines(body.slice(0, st)); s = body.slice(st, ruEnd + 1).join(' ').replace(/\s+/g, ' ');
+    xStart = (eng >= 0 ? eng : ruEnd) + 1;
+    while (xStart < body.length && /^(p{1,2}\.)?\s*\d+\s*$/.test(body[xStart])) xStart++;
+  }
+  return { t: title.join(' ').replace(/\s+/g, ' '), q, s, x: joinLines(body.slice(xStart)) };
+}
+function parseBookPages(pages) {
+  const out = {}; let key = null, buf = [];
+  const flush = () => { if (key && buf.length && !out[key]) out[key] = parseEntry(buf); };
+  for (const lines of pages) {
+    const k = lines.length ? dateHead(lines[0]) : null;
+    if (k) { flush(); key = k; buf = lines.slice(1); }
+    else if (key) buf.push(...lines);
+  }
+  flush();
+  return out;
+}
 async function importBook(e) {
   const file = e.target.files[0]; if (!file) return;
+  const st = $('#bookStatus');
   try {
-    const txt = await file.text();
-    let book = /\.json$/i.test(file.name) || /^\s*[\[{]/.test(txt) ? parseBookJSON(JSON.parse(txt)) : parseBookText(txt);
+    let book;
+    if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
+      st.innerHTML = '<span class="spinner"></span> Открываю PDF…';
+      const pages = await pdfPages(file, (i, n) => st.innerHTML = `<span class="spinner"></span> Читаю страницы: ${i} из ${n}`);
+      book = parseBookPages(pages);
+    } else {
+      const txt = await file.text();
+      book = /\.json$/i.test(file.name) || /^\s*[\[{]/.test(txt) ? parseBookJSON(JSON.parse(txt)) : parseBookText(txt);
+    }
     const n = Object.keys(book).length;
-    if (!n) return toast('Не нашёл в файле дат вида «11 НОЯБРЯ»');
-    S.book = book; save(); renderReading();
+    if (!n) { renderBookStatus(); return toast('В файле не нашлось дат вида «11 НОЯБРЯ»'); }
+    S.book = book; save(); renderBookStatus(); renderReading();
     toast(`Книга загружена: ${n} ${plural(n, ['дата', 'даты', 'дат'])}`);
-  } catch { toast('Не удалось прочитать файл'); }
+  } catch (err) { renderBookStatus(); toast('Не удалось прочитать файл. Нужен интернет для первого открытия PDF.'); }
   e.target.value = '';
 }
+function renderBookStatus() {
+  const n = Object.keys(S.book || {}).length;
+  $('#bookStatus').textContent = n ? `Загружено: ${n} ${plural(n, ['дата', 'даты', 'дат'])} из 366` : 'Книга не загружена';
+  $('#bookDel').classList.toggle('hidden', !n);
+  $('#bookPick').textContent = n ? 'Заменить файл' : '📥 Выбрать PDF';
+}
+$('#bookFile').onchange = importBook;
+$('#bookDel').onclick = () => modal('Удалить книгу с устройства?', '<p class="muted">Текст «Ежедневных размышлений» будет удалён из приложения. Ваши записи останутся.</p>', [
+  { text: 'Отмена' }, { text: 'Удалить', cls: 'primary', onClick: () => { S.book = {}; save(); renderBookStatus(); renderReading(); } }]);
 
 function loadEntry(k) {
   const e = S.entries[k] || {};
@@ -495,11 +553,11 @@ async function geocodeGroup(g) {
 }
 
 /* ================= НАСТРОЙКИ ================= */
-function fillSettings() { $('#sName').value = S.name; $('#sDate').value = S.start; $('#sDate').max = ymd(new Date()); $('#sMoney').value = S.money || ''; }
+function fillSettings() { renderBookStatus(); $('#sName').value = S.name; $('#sDate').value = S.start; $('#sDate').max = ymd(new Date()); }
 $('#sSave').onclick = () => {
   const d = $('#sDate').value;
   if (d && parseYmd(d) > today0()) return toast('Дата не может быть в будущем');
-  S.name = $('#sName').value.trim(); if (d) S.start = d; S.money = Math.max(0, +$('#sMoney').value || 0);
+  S.name = $('#sName').value.trim(); if (d) S.start = d;
   save(); renderSober(); toast('Сохранено');
 };
 $('#resetBtn').onclick = () => modal('Начать отсчёт заново?', '<p class="muted">Срыв — не конец пути. Записи дневника и группы сохранятся. Укажите новую дату трезвости:</p><label class="field"><span>Новая дата</span><input type="date" id="newStart"></label>', [

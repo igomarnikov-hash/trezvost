@@ -215,3 +215,4 @@ input[type=search]{width:100%;background:var(--card2);border:1px solid var(--lin
 .g-right{display:flex;align-items:center;gap:8px}
 .star{background:none;border:none;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:0 2px}
 .star.on{color:var(--warn)}
+.book-status{margin-top:12px;font-weight:700;font-size:14px}
